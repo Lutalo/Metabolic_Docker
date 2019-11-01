@@ -12,12 +12,14 @@ RUN yum groupinstall -y "Development Tools" \
 		zlib-devel \
 		zlib-static \
 		make \
+        epel-release \
 		wget \
         bzip2-devel \
         xz-devel \
         libcurl-devel \
         perl-core \
-        perl-App-cpanminus
+        perl-App-cpanminus \
+        perl-GD
 
 WORKDIR /builds
 RUN wget https://github.com/Kitware/CMake/releases/download/v3.15.4/cmake-3.15.4.tar.gz \
@@ -60,7 +62,7 @@ RUN git clone git://github.com/samtools/htslib.git \
 WORKDIR /builds
 RUN wget https://github.com/wwood/CoverM/releases/download/v0.3.0/coverm-x86_64-unknown-linux-musl-0.3.0.tar.gz \
     && tar xvf coverm-x86_64-unknown-linux-musl-0.3.0.tar.gz \
-    && cd coverm-x86_64-unknown-linux-musl-0.3.0
+    && cd coverm-x86_64-unknown-linux-musl-0.3.0 \
     && mv coverm /usr/bin/
 
 
@@ -75,4 +77,11 @@ RUN cpanm Data::Dumper \
     && cpanm Bio::Tools::CodonTable \
     && cpanm Carp
 
+RUN yum install -y epel-release \
+    && yum install -y R \
+    && mkdir -p /usr/share/doc/R-3.60/html \
+    && cp /usr/lib64/R/library/stats/html/R.css /usr/share/doc/R-3.6.0/html/ \
+    && Rscript -e 'install.packages("diagram", repos = "http://cran.us.r-project.org")'
 
+WORKDIR /metabolic/METABOLIC
+RUN run_to_setup.sh
